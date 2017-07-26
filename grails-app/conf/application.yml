@@ -26,19 +26,8 @@ endpoints:
 
 ---
 grails:
-    gorm:
-      autowire: true
     plugin:
         springsecurity:
-            providerNames:
-              - 'samlAuthenticationProvider'
-            userLookup:
-                userDomainClassName: com.cisco.gtts.User
-                authorityJoinClassName: com.cisco.gtts.UserRole
-                attributeClassName: com.cisco.gtts.Attribute
-            authority:
-                className: com.cisco.gtts.Role
-            securityConfigType: InterceptUrlMap
             logout:
               postOnly: false
             controllerAnnotations:
@@ -61,44 +50,42 @@ grails:
                       access: ['permitAll']
                     - pattern: '/**/images/**'
                       access: ['permitAll']
-        saml:
-            active: true
-            afterLoginUrl: 'http://edarchis.ngrok.io/saml_after'
-            afterLogoutUrl: 'http://edarchis.ngrok.io/saml_logout'
-            responseSkew: 300
-            signatureAlgorithm: 'rsa-sha256'
-            digestAlgorithm: 'sha256'
-            userAttributeMappings:
-                - username: 'emailaddress'
-            userGroupAttribute: 'memberOf' # ???
-            userGroupToRoleMapping:
-                - ROLE_MY_APP_ROLE: 'CN=MYSAMLGROUP, OU=MyAppGroups, DC=myldap, DC=example, DC=com'
-            autoCreate.active: false # We won't create user, if they're in the IdP but not Unbox, they should not have access
-            #autoCreate.key: 'id'
-            metadata:
-                providers:
-                    - unbox: '/conf/security/idp.xml'
-                defaultIdp: 'unbox'
-                url: '/saml/metadata'
-                sp:
-                    file: '/conf/security/sp.xml'
-                    defaults:
-                        local: true
-                        entityId: 'http://unbox.work'
-                        alias: ''
-                        securityProfile: 'pkix'
-                        signingKey: 'unbox'
-                        encryptionKey: 'unbox'
-                        tlsKey: 'unbox'
-                        requireArtifactResolveSigned: false
-                        requireLogoutRequestSigned: false
-                        requireLogoutResponseSigned: false
-            keyManager:
-                storeFile: "classpath:conf/security/keystore2.jks"
-                storePass: 'Deboite'
-                passwords:
-                    - unbox: 'Deboite'
-                defaultKey: 'unbox'
+            saml:
+                active: true
+                afterLoginUrl: 'http://localhost:8080/'
+                afterLogoutUrl: 'http://localhost:8080/'
+                responseSkew: 300
+                signatureAlgorithm: 'rsa-sha256'
+                digestAlgorithm: 'sha256'
+                userGroupAttribute: 'memberOf' # ???
+                userGroupToRoleMapping:
+                    - ROLE_MY_APP_ROLE: 'CN=MYSAMLGROUP, OU=MyAppGroups, DC=myldap, DC=example, DC=com'
+                autoCreate.active: false # We won't create user, if they're in the IdP but not Unbox, they should not have access
+                #autoCreate.key: 'id'
+                metadata:
+                    providers:
+                        - ping: 'security/idp-local.xml'
+                    defaultIdp: 'ping'
+                    url: '/saml/metadata'
+                    sp:
+                        file: 'security/sp.xml'
+                        defaults:
+                            local: true
+                            entityId: 'http://test.com'
+                            alias: 'test'
+                            securityProfile: 'pkix'
+                            signingKey: 'ping'
+                            encryptionKey: 'ping'
+                            tlsKey: 'ping'
+                            requireArtifactResolveSigned: false
+                            requireLogoutRequestSigned: false
+                            requireLogoutResponseSigned: false
+                keyManager:
+                    storeFile: "classpath:security/keystore.jks"
+                    storePass: 'changeit'
+                    passwords:
+                      ping: 'changeit'
+                    defaultKey: 'ping'
     mime:
         disable:
             accept:
@@ -170,6 +157,11 @@ dataSource:
 
 environments:
     development:
+        grails:
+          plugin:
+              springsecurity:
+                  providerNames:
+                    - 'samlAuthenticationProvider'
         dataSource:
             dbCreate: create-drop
             url: jdbc:h2:mem:devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;DB_CLOSE_ON_EXIT=FALSE
